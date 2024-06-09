@@ -3,108 +3,112 @@ import SignUpImage from "../assests/img/SignUp Image.png";
 import { signupUser } from "../api/authApi.js";
 import Swal from "sweetalert2";
 
+interface FormState {
+  name: string;
+  username: string;
+  email: string;
+  password: string;
+  role: string;
+}
+
+const initialFormState: FormState = {
+  name: "",
+  username: "",
+  email: "",
+  password: "",
+  role: "customer",
+};
+
 const SignUp: React.FC = () => {
-  const [name, setName] = useState<string>("");
-  const [username, setUsername] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [role, setRole] = useState<string>("customer");
-  const [nameError, setNameError] = useState<string>("");
-  const [usernameError, setUsernameError] = useState<string>("");
-  const [emailError, setEmailError] = useState<string>("");
-  const [passwordError, setPasswordError] = useState<string>("");
-  const [error, setError] = useState<string | null>("");
+  const [formState, setFormState] = useState<FormState>(initialFormState);
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+  const [error, setError] = useState<string | null>(null);
 
-  const validateName = (name: string) => {
-    if (!name.trim()) {
-      setNameError("Name is required");
-      return false;
-    } else {
-      setNameError("");
-      return true;
-    }
+  const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({
+    name: false,
+    username: false,
+    email: false,
+    password: false,
+    role: false,
+  });
+  
+  const handleChange = (field: keyof FormState, value: string) => {
+    setFormState((prevState) => ({
+      ...prevState,
+      [field]: value,
+    }));
+    
+    // Mark the field as touched
+    setTouchedFields((prevState) => ({
+      ...prevState,
+      [field]: true,
+    }));
   };
-
-  const validateUsername = (username: string) => {
-    if (!username.trim()) {
-      setUsernameError("Username is required");
-      return false;
-    } else {
-      setUsernameError("");
-      return true;
-    }
-  };
-
-  const validateEmail = (email: string) => {
-    if (!email.trim()) {
-      setEmailError("Email is required");
-      return false;
-    } else {
-      setEmailError("");
-      const emailRegex = /\S+@\S+\.\S+/;
-      if (!emailRegex.test(email)) {
-        setEmailError("Invalid email address");
-        return false;
-      } else {
-        setEmailError("");
-        return true;
+  
+  const validateForm = () => {
+    const { name, username, email, password } = formState;
+    const errors: { [key: string]: string } = {};
+  
+    // Check if the current field is touched before validating
+    if (touchedFields.name) {
+      if (!name.trim()) {
+        errors.name = "Name is required";
+      } else if (name.trim().split(" ").length < 2) {
+        errors.name = "Name must contain at least two parts separated by a space";
+      } else if (name.trim().length < 5) {
+        errors.name = "Name must be at least 5 characters long";
       }
     }
-  };
-
-  const validatePassword = (password: string) => {
-    if (!password.trim()) {
-      setPasswordError("Password is required");
-      return false;
-    } else {
-      setPasswordError("");
-      const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{6,}$/;
-      if (!passwordRegex.test(password)) {
-        setPasswordError("Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, and one number");
-        return false;
-      } else {
-        setPasswordError("");
-        return true;
+  
+    if (touchedFields.username) {
+      if (!username.trim()) {
+        errors.username = "Username is required";
+      } else if (username.trim().length < 5) {
+        errors.username = "Username must be at least 5 characters long";
       }
     }
-  };
-
-  const isFormValid = () => {
-    const isNameValid = validateName(name);
-    const isUsernameValid = validateUsername(username);
-    const isEmailValid = validateEmail(email);
-    const isPasswordValid = validatePassword(password);
   
-    return isNameValid && isUsernameValid && isEmailValid && isPasswordValid;
-  };
-
-  const handleNameChange = (value: string) => {
-    setName(value);
+    if (touchedFields.email) {
+      if (!email.trim()) {
+        errors.email = "Email is required";
+      } else {
+        const emailRegex = /\S+@\S+\.\S+/;
+        if (!emailRegex.test(email)) {
+          errors.email = "Invalid email address";
+        }
+      }
+    }
+  
+    if (touchedFields.password) {
+      if (!password.trim()) {
+        errors.password = "Password is required";
+      } else {
+        const passwordRegex =
+          /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{6,}$/;
+        if (!passwordRegex.test(password)) {
+          errors.password =
+            "Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, and one number";
+        }
+      }
+    }
+  
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
   
-  const handleUsernameChange = (value: string) => {
-    setUsername(value);
-  };
   
-  const handleEmailChange = (value: string) => {
-    setEmail(value);
-  };
-  
-  const handlePasswordChange = (value: string) => {
-    setPassword(value);
-  };
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!isFormValid()) {
+    const isFormValid = validateForm();
+
+    if (!isFormValid) {
       setError("Please fill in all fields correctly.");
       return;
     }
 
     try {
-      const userData = { name, username, email, password, role };
-      const response = await signupUser(userData);
+      const response = await signupUser(formState);
 
       await Swal.fire({
         icon: "success",
@@ -113,15 +117,25 @@ const SignUp: React.FC = () => {
       });
 
       console.log("Signup successful:", response);
-      window.location.href = "/login";
-    } catch (error) {
-      setError("Signup failed. Please try again.");
+      // Reset form and errors after successful submission
+      setFormState(initialFormState);
+      setFormErrors({});
+      setError(null);
+      window.location.href = "/login"; // Redirect to Login page
+    } catch (error: any) {
       console.error("Signup error:", error);
+      let errorMessage = "Signup failed. Please try again.";
+
+      if (error.response && error.response.data) {
+        errorMessage = error.response.data.message || errorMessage;
+      }
+
+      setError(errorMessage);
 
       await Swal.fire({
         icon: "error",
         title: "Signup Failed!",
-        text: "An error occurred while signing up. Please try again later.",
+        text: errorMessage,
       });
     }
   };
@@ -133,34 +147,106 @@ const SignUp: React.FC = () => {
           <h2 className="text-4xl text-inter mb-6">Sign Up</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-6">
-              <label className="block text-gray-700 text-inter font-bold mb-2" htmlFor="name">Name</label>
-              <input className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="name" type="text" value={name} onChange={(e) => handleNameChange(e.target.value)} />
-              {nameError && <div className="text-red-500 text-sm">{nameError}</div>}
+              <label
+                className="block text-gray-700 text-inter font-bold mb-2"
+                htmlFor="name"
+              >
+                Name
+              </label>
+              <input
+                className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="name"
+                type="text"
+                value={formState.name}
+                onChange={(e) => handleChange("name", e.target.value)}
+              />
+              {formErrors.name && (
+                <div className="text-red-500 text-sm">{formErrors.name}</div>
+              )}
+            </div>
+            {/* Rest of your form code... */}
+            {/* ... */}
+            <div className="mb-6">
+              <label
+                className="block text-gray-700 text-inter font-bold mb-2"
+                htmlFor="username"
+              >
+                Username
+              </label>
+              <input
+                className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="username"
+                type="text"
+                value={formState.username}
+                onChange={(e) => handleChange("username", e.target.value)}
+              />
+              {formErrors.username && (
+                <div className="text-red-500 text-sm">
+                  {formErrors.username}
+                </div>
+              )}
             </div>
             <div className="mb-6">
-              <label className="block text-gray-700 text-inter font-bold mb-2" htmlFor="username">Username</label>
-              <input className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" value={username} onChange={(e) => handleUsernameChange(e.target.value)} />
-              {usernameError && <div className="text-red-500 text-sm">{usernameError}</div>}
+              <label
+                className="block text-gray-700 text-inter font-bold mb-2"
+                htmlFor="email"
+              >
+                Email
+              </label>
+              <input
+                className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="email"
+                type="email"
+                value={formState.email}
+                onChange={(e) => handleChange("email", e.target.value)}
+              />
+              {formErrors.email && (
+                <div className="text-red-500 text-sm">{formErrors.email}</div>
+              )}
             </div>
             <div className="mb-6">
-              <label className="block text-gray-700 text-inter font-bold mb-2" htmlFor="email">Email</label>
-              <input className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" value={email} onChange={(e) => handleEmailChange(e.target.value)} />
-              {emailError && <div className="text-red-500 text-sm">{emailError}</div>}
+              <label
+                className="block text-gray-700 text-inter font-bold mb-2"
+                htmlFor="password"
+              >
+                Password
+              </label>
+              <input
+                className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700
+    leading-tight focus:outline-none focus:shadow-outline"
+                id="password"
+                type="password"
+                value={formState.password}
+                onChange={(e) => handleChange("password", e.target.value)}
+              />
+              {formErrors.password && (
+                <div className="text-red-500 text-sm">
+                  {formErrors.password}
+                </div>
+              )}
             </div>
             <div className="mb-6">
-              <label className="block text-gray-700 text-inter font-bold mb-2" htmlFor="password">Password</label>
-              <input className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" value={password} onChange={(e) => handlePasswordChange(e.target.value)} />
-              {passwordError && <div className="text-red-500 text-sm">{passwordError}</div>}
-            </div>
-            <div className="mb-6">
-              <label className="block text-gray-700 text-inter font-bold mb-2" htmlFor="role">Role</label>
-              <select className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="role" value={role} onChange={(e) => setRole(e.target.value)}>
+              <label
+                className="block text-gray-700 text-inter font-bold mb-2"
+                htmlFor="role"
+              >
+                Role
+              </label>
+              <select
+                className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="role"
+                value={formState.role}
+                onChange={(e) => handleChange("role", e.target.value)}
+              >
                 <option value="customer">Customer</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
             {error && <div className="text-red-500 text-sm mb-6">{error}</div>}
-            <button className="bg-primaryDark hover:bg-secondaryDark text-white font-bold py-3 px-8 rounded mb-4 mt-3" type="submit" disabled={!isFormValid()}>
+            <button
+              className="bg-primaryDark hover:bg-secondaryDark text-white font-bold py-3 px-8 rounded mb-4 mt-3"
+              type="submit"
+            >
               Sign Up
             </button>
           </form>
@@ -174,4 +260,3 @@ const SignUp: React.FC = () => {
 };
 
 export default SignUp;
-

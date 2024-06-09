@@ -6,11 +6,13 @@ import logo from "../../../assests/img/nk music logo.png";
 interface SidebarProps {
   showSidebar: boolean;
   handleAddProductClick: () => void;
+  handleLoadProductsClick: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   showSidebar,
   handleAddProductClick,
+  handleLoadProductsClick,
 }) => {
   return (
     <>
@@ -45,6 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <button
                 type="button"
                 className="flex items-center justify-center w-full hover:bg-primaryDark text-white font-bold py-2 rounded focus:outline-none focus:shadow-outline mb-4"
+                onClick={handleLoadProductsClick}
               >
                 <IonIcon icon={reloadOutline} size="large" className="mr-2" />
                 Load Products

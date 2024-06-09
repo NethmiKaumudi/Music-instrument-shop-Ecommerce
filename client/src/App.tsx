@@ -4,6 +4,8 @@ import Home from "./pages/HomePage";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import AdminProductAddPage from "./pages/AdminProductAddPage";
+import AdminProductLoadPage from "./pages/AdminProductLoadPage";
+
 
 const App: React.FC = () => {
   // useEffect(() => {
@@ -33,6 +35,8 @@ const App: React.FC = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/AdminProductAddPage" element={<AdminProductAddPage />} />
+          <Route path="/AdminProductLoadPage" element={<AdminProductLoadPage/>} />
+
         </Routes>
       </div>
     </BrowserRouter>

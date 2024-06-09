@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Dropzone from "react-dropzone";
 import Swal from "sweetalert2";
-import Sidebar from "../components/LayOut/SideBar/SideBar"; 
+import axios from "axios";
+import Sidebar from "../components/LayOut/SideBar/SideBar";
 
 const AdminProductAddPage: React.FC = () => {
   const navigate = useNavigate();
@@ -17,17 +18,54 @@ const AdminProductAddPage: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    try {
-      await Swal.fire({
-        icon: "success",
-        title: "Product Added",
-        text: "The product has been added successfully.",
+    if (!image) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Please upload an image",
       });
-    } catch (error) {
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("description", description);
+      formData.append("price", price.toString());
+      formData.append("image", image);
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("JWT token not found");
+      }
+
+      const response = await axios.post(
+        "http://localhost:4000/product",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        // Product created successfully
+        await Swal.fire({
+          icon: "success",
+          title: "Product Added",
+          text: "The product has been added successfully.",
+        });
+        navigate("/admin/products");
+      } else {
+        throw new Error("Failed to add product");
+      }
+    } catch (error: any) {
       await Swal.fire({
         icon: "error",
         title: "Error",
-        text: "An error occurred. Please try again later.",
+        text: error.message || "An error occurred. Please try again later.",
       });
     }
   };
@@ -37,24 +75,37 @@ const AdminProductAddPage: React.FC = () => {
     setShowSidebar(true);
   };
 
+  const handleLoadProductsClick = () => {
+    // Define your logic to load products here
+    console.log("Load products clicked");
+  };
+
   useEffect(() => {
     handleAddProductClick();
   }, []);
+
+  useEffect(() => {
+    console.log(image); // Log the image object
+  }, [image]); // Trigger the effect whenever image changes
 
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
       <Sidebar
-        showSidebar={showSidebar}
+        showSidebar={true} // Set the showSidebar prop to true
         handleAddProductClick={handleAddProductClick}
+        handleLoadProductsClick={handleLoadProductsClick} // Pass the function to handle Load Products click
       />
       {/* Form */}
       {showForm && (
-        <div className="flex-1 bg-secondary p-2 ">
+        <div className="flex-1 bg-secondary p-2">
           <h1 className="text-3xl font-bold mb-3 mt-[6px] text-center">
             Add Product
           </h1>
-          <form onSubmit={handleSubmit} className="max-w-3xl mx-auto  p-4">
+          <form
+            onSubmit={handleSubmit}
+            className="max-w-3xl mx-auto p-4"
+          >
             {/* Form fields */}
             {/* Name */}
             <div className="mb-4">
@@ -114,13 +165,20 @@ const AdminProductAddPage: React.FC = () => {
               >
                 Image
               </label>
-              <Dropzone onDrop={(acceptedFiles) => setImage(acceptedFiles[0])}>
+              <Dropzone
+                onDrop={(acceptedFiles) => setImage(acceptedFiles[0])}
+              >
                 {({ getRootProps, getInputProps }) => (
                   <div
                     {...getRootProps()}
                     className="border border-dashed rounded-md p-6 text-center cursor-pointer"
                   >
-                    <input {...getInputProps()} />
+                    <input
+                      type="file"
+                      id="image"
+                      {...getInputProps()}
+                      multiple
+                    />
                     {image ? (
                       <img
                         src={URL.createObjectURL(image)}
@@ -128,7 +186,9 @@ const AdminProductAddPage: React.FC = () => {
                         className="max-w-fit h-[200px] mx-auto"
                       />
                     ) : (
-                      <p>Drag 'n' drop an image here, or click to select one</p>
+                      <p>
+                        Drag 'n' drop an image here, or click to select one
+                      </p>
                     )}
                   </div>
                 )}
@@ -137,8 +197,7 @@ const AdminProductAddPage: React.FC = () => {
             {/* Submit button */}
             <button
               type="submit"
-              className="w-64 flex justify-center bg-primaryDark hover:bg-secondaryDark text-white font-bold py-2 px-4 rounded focus:outline-none focus
-                  :shadow-outline mx-auto mt-24"
+              className="w-64 flex justify-center bg-primaryDark hover:bg-secondaryDark text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mx-auto mt-24"
             >
               Add Product
             </button>
