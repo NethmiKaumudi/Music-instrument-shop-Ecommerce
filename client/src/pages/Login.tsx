@@ -1,25 +1,40 @@
+// Login.js
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Changed import
-
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import LoginImage from "../assests/img/Login Image.png";
+import { loginUser } from "../api/authApi"; // Import authentication functions
 
 const Login: React.FC = () => {
-  const navigate = useNavigate(); // Changed from useHistory
+  const navigate = useNavigate();
 
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // TODO: Submit the form data to your backend
-    console.log("Username:", username);
-    console.log("Password:", password);
-    navigate("/home", { replace: true }); // Navigate to "/home" on successful login
+
+    try {
+      const userData = await loginUser(username, password);
+
+      // Display success message
+      await Swal.fire({
+        icon: "success",
+        title: "Login Successful!",
+        text: "You have successfully logged in.",
+      });
+
+      // Redirect to home page
+      navigate("/AdminProductAddPage", { replace: true });
+    } catch (error) {
+      setError("Login failed. Please check your credentials.");
+      console.error("Login error:", error);
+    }
   };
 
   const handleSignupRedirect = () => {
-    navigate("/signup"); // Navigate to "/signup" when sign up is clicked
+    navigate("/signup");
   };
 
   return (
@@ -80,11 +95,7 @@ const Login: React.FC = () => {
           </form>
         </div>
         <div className="hidden md:block">
-          <img
-            src={LoginImage}
-            alt="Login"
-            className="w-full h-full object-cover rounded-lg"
-          />
+          <img src={LoginImage} alt="Login" className="w-full h-full object-cover rounded-lg" />
         </div>
       </div>
     </div>

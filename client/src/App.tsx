@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./pages/HomePage";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
-// import './'; 
+import AdminProductAddPage from "./pages/AdminProductAddPage";
 
 const App: React.FC = () => {
   // useEffect(() => {
@@ -32,7 +32,7 @@ const App: React.FC = () => {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
-          {/* <Route path="/product" element={<Product />} /> */}
+          <Route path="/AdminProductAddPage" element={<AdminProductAddPage />} />
         </Routes>
       </div>
     </BrowserRouter>
