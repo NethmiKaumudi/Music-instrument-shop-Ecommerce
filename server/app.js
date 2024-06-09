@@ -4,9 +4,11 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors = require('cors');
-// const DBConnection = require('./db/DBConnection');
-// DBConnection()
-//     .then(r => console.log(r));
+const DBConnection = require('./db/DBConnection');
+
+DBConnection()
+    .then(() => console.log('Database connected successfully'))
+    .catch(err => console.error('Database connection error:', err));
 
 
 var indexRouter = require('./routes/index');
