@@ -1,45 +1,60 @@
-import React, { useEffect } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Home from "./pages/HomePage";
+// src/App.tsx
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import ProtectedRoute from "./components/Shared/ProtectedRoute";
 import Login from "./pages/Login";
+import Home from "./pages/HomePage";
 import SignUp from "./pages/SignUp";
-import AdminProductAddPage from "./pages/AdminProductAddPage";
-import AdminProductLoadPage from "./pages/AdminProductLoadPage";
+import ProductList from "./pages/ProductListPage";
+import CartPage from "./pages/Cartpage";
+import Payment from "./pages/Payment";
+import NotFound from "./pages/NotFound";
+import AdminDashBoard from "./pages/AdminDashBoard";
+// import AdminAddProduct from "./pages/AdminProductAddPage";
 
+// import { isLoggedIn } from "./api/authApi";
 
 const App: React.FC = () => {
-  // useEffect(() => {
-  //   const ioniconsScript = document.createElement("script");
-  //   ioniconsScript.type = "module";
-  //   ioniconsScript.src =
-  //     "https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js";
-  //   document.head.appendChild(ioniconsScript);
-
-  //   const ioniconsNomoduleScript = document.createElement("script");
-  //   ioniconsNomoduleScript.src =
-  //     "https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js";
-  //   document.head.appendChild(ioniconsNomoduleScript);
-
-  //   return () => {
-  //     // Clean up by removing the scripts when the component unmounts
-  //     document.head.removeChild(ioniconsScript);
-  //     document.head.removeChild(ioniconsNomoduleScript);
-  //   };
-  // }, []);
-
   return (
-    <BrowserRouter>
-      <div className="overflow-x-hidden">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/AdminProductAddPage" element={<AdminProductAddPage />} />
-          <Route path="/AdminProductLoadPage" element={<AdminProductLoadPage/>} />
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/product-list" element={<ProductList />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/payment" element={<Payment />} />
+        {/* <Route
+          path="/admin"
+          element={
+            isLoggedIn() ? (
+              <ProtectedRoute element={<AdminDashBoard />} />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />{" "} */}
+        <Route path="/admin" element={<AdminDashBoard/>}/>
+        {/* <Route
+          path="/admin"
+          element={
+            isLoggedIn() ? (
+              <ProtectedRoute element={<AdminDashBoard />} />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        /> */}
+        {/* <Route path="/admin/add-product" element={<AdminAddProduct/>}/> */}
 
-        </Routes>
-      </div>
-    </BrowserRouter>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
   );
 };
 

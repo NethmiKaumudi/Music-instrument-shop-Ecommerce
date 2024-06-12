@@ -1,99 +1,188 @@
-const Product = require('../models/productModel');
+const Product = require("../models/productModel");
+const cloudinary = require("../config/cloudinaryConfig");
+const multer = require('multer');
 
-// Controller function to create a product
-exports.createProduct = async (req, res) => {
+// Multer configuration
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Specify the directory to save uploaded files
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname); // Specify filename (you can customize this)
+  }
+});
+
+const upload = multer({ storage: storage });
+// const addProduct = async (req, res) => {
+//   console.log(req.body)
+//   try {
+//     const { name, description, price, quantity, image } = req.body;
+
+//     if (!image) {
+//       return res.status(400).json({ error: "Image file is required" });
+//     }
+
+//     // Upload image to Cloudinary
+//     const uploadedImage = await cloudinary.uploader.upload(image, {
+//       folder: "Music-Ecommerce", // Specify the folder in which to store the image
+//       upload_preset: "Music-Ecommerce", // Specify the upload preset configured in your Cloudinary account
+//     });
+
+//     // Set status based on quantity
+//     const status = quantity > 0 ? "Available" : "Sold Out";
+
+//     // Create new product instance
+//     const product = new Product({
+//       name,
+//       description,
+//       price: parseInt(price),
+//       quantity: parseInt(quantity, 10),
+//       image: uploadedImage,
+//       status,
+//     });
+
+//     // Save product to database
+//     const savedProduct = await product.save();
+
+//     res.status(201).json({ message: "Product added successfully", product: savedProduct });
+//   } catch (error) {
+//     console.error("Error adding product:", error);
+//     res.status(500).json({ message: "Failed to add product" });
+//   }
+// };
+const addProduct = async (req, res) => {
   try {
-    const { name, description, price } = req.body;
-    const image = req.file ? req.file.filename : null;
+    const { name, description, price, quantity, image, category } = req.body;
 
     if (!image) {
-      return res.status(400).json({ message: "Image is required" });
+      return res.status(400).json({ error: "Image file is required" });
     }
 
-    // Check if the user is an admin
-    if (!req.user || req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Only admin users can add products' });
-    }
+    // Convert image to Base64 string
+    const imageData = image.data.toString("base64");
 
+    // Upload image to Cloudinary
+    const uploadedImage = await cloudinary.uploader.upload(`data:image/jpeg;base64,${imageData}`, {
+      folder: "Music-Ecommerce",
+      upload_preset: "Music-Ecommerce",
+    });
+
+    // Set status based on quantity
+    const status = quantity > 0 ? "Available" : "Sold Out";
+
+    // Create new product instance
     const product = new Product({
       name,
       description,
-      price,
-      image,
+      price: parseFloat(price),
+      quantity: parseInt(quantity, 10),
+      image: uploadedImage.secure_url,
+      category, // Add category to the product
+      status,
     });
 
-    await product.save();
-    res.status(201).json({ message: "Product created successfully", product });
+    // Save product to database
+    const savedProduct = await product.save();
+
+    res.status(201).json({ message: "Product added successfully", product: savedProduct });
   } catch (error) {
-    if (error instanceof multer.MulterError) {
-      // Handle Multer-specific errors
-      return res.status(400).json({ message: error.message });
-    } else {
-      // Handle other errors
-      console.error(error);
-      res.status(500).json({ message: "Server error", error });
-    }
+    console.error("Error adding product:", error);
+    res.status(500).json({ message: "Failed to add product" });
   }
 };
 
-// Controller function to get all products
-exports.getAllProducts = async (req, res) => {
+const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, price, quantity, image, category } = req.body;
+
+    // Find the product by ID
+    let product = await Product.findOne({ _id: id, isDeleted: false });
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    if (image) {
+      // Upload new image to Cloudinary
+      const uploadedImage = await cloudinary.uploader.upload(image, {
+        folder: "Music-Ecommerce",
+        upload_preset: "Music-Ecommerce",
+      });
+      product.image = uploadedImage.secure_url;
+    }
+
+    product.name = name || product.name;
+    product.description = description || product.description;
+    product.price = price !== undefined ? parseFloat(price) : product.price;
+    product.quantity = quantity !== undefined ? parseInt(quantity, 10) : product.quantity;
+    product.category = category || product.category; // Update category
+    product.status = product.quantity > 0 ? "Available" : "Sold Out";
+
+    // Save updated product to database
+    const updatedProduct = await product.save();
+
+    res.status(200).json({ message: "Product updated successfully", product: updatedProduct });
+  } catch (error) {
+    console.error("Error updating product:", error);
+    res.status(500).json({ message: "Failed to update product" });
+  }
+};
+
+
+// Soft Delete Product
+const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const product = await Product.findByIdAndUpdate(id, { isDeleted: true }, { new: true });
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json({ message: "Product deleted successfully", product });
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    res.status(500).json({ message: "Failed to delete product" });
+  }
+};
+
+// Get All Products
+const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find({ isDeleted: false });
-    res.json(products);
+    res.status(200).json(products);
   } catch (error) {
-    console.error(error);
-    res.status(500).send('Server Error');
+    console.error("Error retrieving products:", error);
+    res.status(500).json({ message: "Failed to retrieve products" });
   }
 };
 
-// Controller function to get a single product by ID
-exports.getProductById = async (req, res) => {
+// Get Product by ID
+const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const { id } = req.params;
+
+    const product = await Product.findOne({ _id: id, isDeleted: false });
+
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
-    res.json(product);
+
+    res.status(200).json(product);
   } catch (error) {
-    console.error(error);
-    res.status(500).send('Server Error');
+    console.error("Error retrieving product:", error);
+    res.status(500).json({ message: "Failed to retrieve product" });
   }
 };
 
-// Controller function to update a product
-exports.updateProduct = async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
 
-    if (req.body.name) product.name = req.body.name;
-    if (req.body.description) product.description = req.body.description;
-    if (req.body.price) product.price = req.body.price;
-    if (req.file) product.imageUrl = req.file.path; // Update imageUrl if a new file is uploaded
 
-    await product.save();
-    res.json(product);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Server Error');
-  }
-};
-
-// Controller function to soft delete a product
-exports.softDeleteProduct = async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
-    product.isDeleted = true;
-    await product.save();
-    res.json({ message: 'Product soft deleted successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Server Error');
-  }
+module.exports = {
+  addProduct,
+  deleteProduct,
+  getAllProducts,
+  getProductById,
+  updateProduct,
 };

@@ -1,12 +1,13 @@
-// Login.js
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import LoginImage from "../assests/img/Login Image.png";
 import { loginUser } from "../api/authApi"; // Import authentication functions
+import { jwtDecode } from "jwt-decode";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -18,6 +19,10 @@ const Login: React.FC = () => {
     try {
       const userData = await loginUser(username, password);
 
+      // Decode the token to extract role information
+      const role: string = userData.role; // Access the role from the response
+console.log(role);
+
       // Display success message
       await Swal.fire({
         icon: "success",
@@ -25,8 +30,21 @@ const Login: React.FC = () => {
         text: "You have successfully logged in.",
       });
 
-      // Redirect to home page
-      navigate("/AdminProductAddPage", { replace: true });
+      console.log(role);
+
+      if (location.pathname === "/cart") {
+        // If user logged in during checkout, navigate to payment page
+        navigate("/payment");
+      } else if (role === "customer") {
+        // If user is a customer, navigate to product list page
+        navigate("/product-list");
+      } else if (role === "admin") {
+        // If user is an owner, navigate to product add form with sidebar
+        navigate("/admin", { replace: true });
+      } else {
+        // Default redirect, can be modified based on requirements
+        navigate("/product-list");
+      }
     } catch (error) {
       setError("Login failed. Please check your credentials.");
       console.error("Login error:", error);
@@ -87,7 +105,7 @@ const Login: React.FC = () => {
               </button>
             </div>
             <button
-              className="bg-primaryDark hover:bg-secendaryDark text-white font-bold py-3 px-8 rounded mb-4 mt-3"
+              className="bg-primaryDark hover:bg-secondaryDark text-white font-bold py-3 px-8 rounded mb-4 mt-3"
               type="submit"
             >
               Login
@@ -95,7 +113,11 @@ const Login: React.FC = () => {
           </form>
         </div>
         <div className="hidden md:block">
-          <img src={LoginImage} alt="Login" className="w-full h-full object-cover rounded-lg" />
+          <img
+            src={LoginImage}
+            alt="Login"
+            className="w-full h-full object-cover rounded-lg"
+          />
         </div>
       </div>
     </div>

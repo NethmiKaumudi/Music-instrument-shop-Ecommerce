@@ -1,56 +1,70 @@
-import React, { useState } from "react";
-import { IonIcon } from "@ionic/react";
-import { pencilOutline, trashOutline } from "ionicons/icons";
-import Sidebar from "../components/LayOut/SideBar/SideBar"; // Import the Sidebar component
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { IoPencil, IoTrash } from "react-icons/io5";
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   description: string;
   price: number;
+  imageUrl: string;
 }
 
-interface ProductTablePageProps {
-    handleLoadProductsClick: () => void;
-    handleAddProductClick: () => void;
-}
-
-const ProductTablePage: React.FC<ProductTablePageProps> = ({
-    handleAddProductClick,
-    handleLoadProductsClick,
-}) => {
-  // Sample data for demonstration
-  const products: Product[] = [
-    { id: 1, name: "Product 1", description: "Description 1", price: 100 },
-    { id: 2, name: "Product 2", description: "Description 2", price: 150 },
-    { id: 3, name: "Product 3", description: "Description 3", price: 200 },
-    { id: 4, name: "Product 4", description: "Description 4", price: 250 },
-    { id: 5, name: "Product 5", description: "Description 5", price: 300 },
-    { id: 6, name: "Product 6", description: "Description 6", price: 350 },
-    { id: 7, name: "Product 7", description: "Description 7", price: 400 },
-    { id: 8, name: "Product 8", description: "Description 8", price: 450 },
-    { id: 9, name: "Product 9", description: "Description 9", price: 500 },
-    { id: 10, name: "Product 10", description: "Description 10", price: 550 },
-  ];
-
-  const [searchQuery, setSearchQuery] = useState<string>("");
+const AdminProductLoadPage: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
   const productsPerPage = 5;
 
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
 
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = filteredProducts.slice(
-    indexOfFirstProduct,
-    indexOfLastProduct
-  );
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
-    setCurrentPage(1);
+        // Generate 10 dummy products
+        const dummyProducts: Product[] = [];
+        for (let i = 0; i < 10; i++) {
+          dummyProducts.push({
+            id: `${i + 1}`,
+            name: `Dummy Product ${i + 1}`,
+            description: `This is a dummy product description for product ${i + 1}.`,
+            price: Math.random() * 100, // Generate a random price
+            imageUrl: `https://via.placeholder.com/150?text=Product${i + 1}`, // Use a placeholder image URL
+          });
+        }
+
+        // Calculate total pages based on the number of products and products per page
+        const totalPages = Math.ceil(dummyProducts.length / productsPerPage);
+
+        // Slice the dummy products to display only the products for the current page
+        const startIndex = (currentPage - 1) * productsPerPage;
+        const endIndex = startIndex + productsPerPage;
+        const productsForCurrentPage = dummyProducts.slice(startIndex, endIndex);
+
+        // Set the generated dummy products and total pages
+        setProducts(productsForCurrentPage);
+        setTotalPages(totalPages);
+
+        setLoading(false); // Set loading to false after fetching data
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setLoading(false); // Set loading to false in case of error
+      }
+    };
+
+    fetchProducts();
+  }, [currentPage]);
+
+  const handleEditProduct = (id: string) => {
+    // Implement edit functionality here
+  };
+
+  const handleDeleteProduct = async (id: string) => {
+    // Implement delete functionality here
   };
 
   const handlePageChange = (page: number) => {
@@ -58,75 +72,66 @@ const ProductTablePage: React.FC<ProductTablePageProps> = ({
   };
 
   return (
-    <div className="flex">
-      {/* Sidebar */}
-      <Sidebar
-        showSidebar={true} // Set the showSidebar prop to true
-        handleAddProductClick={handleAddProductClick}
-        handleLoadProductsClick={handleLoadProductsClick} // You can define the handleLoadProductsClick function as needed
-      />
-      {/* Main content */}
-      <div className="flex-1">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={handleSearchChange}
-          placeholder="Search products..."
-          className="border border-gray-300 rounded-md p-2 mb-4"
-        />
-        {/* Product Table */}
-        <table className="min-w-full">
-          {/* Table headers */}
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Price</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          {/* Table body */}
-          <tbody>
-            {currentProducts.map((product) => (
-              <tr key={product.id}>
-                <td>{product.name}</td>
-                <td>{product.description}</td>
-                <td>${product.price}</td>
-                <td>
-                  <button>
-                    <IonIcon
-                      icon={pencilOutline}
-                      className="text-blue-500"
-                    />
-                  </button>
-                  <button>
-                    <IonIcon icon={trashOutline} className="text-red-500" />
-                  </button>
-                </td>
+    <div className="w-full p-8">
+      {loading ? (
+        <div className="bg-yellow-700 hover:bg-yellow-900 w-36 text-white font-bold py-2 px-4 rounded relative">Loading...</div>
+      ) : (
+        <div>
+          <h1 className="text-3xl font-bold mb-6">Product List</h1>
+          <table className="min-w-full bg-white border">
+          <thead className="bg-primaryDark text-white">
+          <tr>
+                <th className="py-2 px-4 border-b">Name</th>
+                <th className="py-2 px-4 border-b">Description</th>
+                <th className="py-2 px-4 border-b">Price</th>
+                <th className="py-2 px-4 border-b">Image</th>
+                <th className="py-2 px-4 border-b">Actions</th>
               </tr>
+            </thead>
+            <tbody>
+              {products.map((product) => (
+                <tr key={product.id}>
+                  <td className="py-2 px-4 border-b">{product.name}</td>
+                  <td className="py-2 px-4 border-b">{product.description}</td>
+                  <td className="py-2 px-4 border-b">${product.price.toFixed(2)}</td>
+                  <td className="py-2 px-4 border-b">
+                    <img src={product.imageUrl} alt={product.name} className="w-16 h-16 object-cover" />
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    <button
+                      className="mr-2 text-secendaryDark size-14"
+                      onClick={() => handleEditProduct(product.id)}
+                    >
+                      <IoPencil />
+                    </button>
+                    <button
+                      className="text-secendaryDark size-14"
+                      onClick={() => handleDeleteProduct(product.id)}
+                    >
+                      <IoTrash />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="mt-4 flex justify-center">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                className={`mr-2 py-2 px-4 ${
+                  currentPage === i + 1 ? "bg-black text-white" : "bg-white"
+                } border`}
+                onClick={() => handlePageChange(i + 1)}
+              >
+                {i + 1}
+              </button>
             ))}
-          </tbody>
-        </table>
-        {/* Pagination */}
-        <div className="flex justify-center mt-4">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="mr-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded"
-          >
-            Previous
-          </button>
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={indexOfLastProduct >= filteredProducts.length}
-            className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded"
-          >
-            Next
-          </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
 
-export default ProductTablePage;
+export default AdminProductLoadPage;

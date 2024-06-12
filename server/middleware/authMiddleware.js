@@ -1,33 +1,24 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/userModel');
+const secretKey = process.env.JWT_SECRET;
 
-const auth = async (req, res, next) => {
+const authMiddleware = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).json({ message: 'Authorization header missing' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ message: 'Token missing' });
+    }
+
     try {
-        const token = req.header('Authorization');
-        if (!token) {
-            throw new Error('Authorization header is missing');
-        }
-        
-        // Extract the token from the header
-        const tokenParts = token.split(' ');
-        if (tokenParts.length !== 2 || tokenParts[0] !== 'Bearer') {
-            throw new Error('Invalid authorization header format');
-        }
-        const decodedToken = tokenParts[1];
-
-        const decoded = jwt.verify(decodedToken, process.env.JWT_SECRET);
-        const user = await User.findOne({ _id: decoded._id, 'tokens.token': decodedToken });
-
-        if (!user) {
-            throw new Error('User not found');
-        }
-
-        req.token = decodedToken;
-        req.user = user;
+        const decoded = jwt.verify(token, secretKey);
+        req.user = decoded;
         next();
     } catch (error) {
-        res.status(401).send({ error: error.message || 'Please authenticate.' });
+        return res.status(401).json({ message: 'Invalid token' });
     }
 };
 
-module.exports = auth;
+module.exports = authMiddleware;

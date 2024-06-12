@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import logo from "../../../../src/assests/img/nk music logo.png";
 import Button from "../../Shared/Button";
 import { IonIcon } from "@ionic/react";
+import { Link } from "react-router-dom";
 // import { close, menu } from 'ionicons/icons';
 // import * as Ionicons from 'ionicons/types'
 
@@ -24,14 +25,14 @@ const Navbar: React.FC = () => {
   return (
     <div className="shadow-md w-full fixed top-0 left-0">
       <div className="md:flex items-center justify-between bg-white py-0.5 md:px-10 px-7">
-        <span className="text-2xl text-secendaryDark mr-4 pt-2 cursor-pointer flex items-center font-inter">
-          <img
-            alt=""
-            src={logo}
-            className="d-inline-block align-top w-24 h-auto"
-          />
-          NKBEATS
-        </span>
+      <Link to="/" className="text-2xl text-secendaryDark mr-4 pt-2 cursor-pointer flex items-center font-inter">
+        <img
+          alt=""
+          src={logo}
+          className="d-inline-block align-top w-24 h-auto"
+        />
+        NKBEATS
+      </Link>
         <div
           onClick={() => setOpen(!open)}
           className="text-3xl absolute right-8 top-14 cu md:hidden"

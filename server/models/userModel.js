@@ -8,9 +8,9 @@ const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, default: 'customer' },
-    tokens: [{
-        token: { type: String, required: true }
-    }]
+    // tokens: [{
+    //     token: { type: String, required: true }
+    // }]
 });
 
 userSchema.pre('save', async function (next) {
@@ -20,12 +20,13 @@ userSchema.pre('save', async function (next) {
     next();
 });
 
-userSchema.methods.generateAuthToken = async function () {
-    const token = jwt.sign({ _id: this._id.toString() }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    this.tokens = this.tokens.concat({ token });
-    await this.save();
-    return token;
-};
+// userSchema.methods.generateAuthToken = async function () {
+//     const token = jwt.sign({ _id: this._id.toString(), role: this.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+//     this.tokens = this.tokens.concat({ token });
+//     await this.save();
+//     return token;
+// };
+
 
 const User = mongoose.model('User', userSchema);
 
