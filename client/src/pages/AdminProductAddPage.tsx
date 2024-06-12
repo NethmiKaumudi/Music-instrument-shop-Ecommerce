@@ -1,36 +1,77 @@
 import React, { useState } from "react";
-import { addProduct } from "../api/productAoi";
 import Swal from "sweetalert2";
 import { IoClose } from "react-icons/io5";
+
+const BASE_URL = "http://localhost:4000"; // Replace this with your backend URL
+
+interface Product {
+  name: string;
+  description: string;
+  price: string;
+  image: File | null; // Change type to File | null to handle file uploads
+  quantity: string;
+  category: string;
+}
 
 interface AddProductPopupProps {
   onClose: () => void;
 }
 
 const AddProduct: React.FC<AddProductPopupProps> = ({ onClose }) => {
-  const [product, setProduct] = useState({
+  const [product, setProduct] = useState<Product>({
     name: "",
     description: "",
     price: "",
-    image: null,
+    image: null, // Change to null
     quantity: "",
-    category: "", // New category field
+    category: "",
   });
 
   const [error, setError] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null); // State for image preview
 
   const handleChange = (field: string, value: string | File) => {
-    setProduct((prevProduct) => ({
-      ...prevProduct,
-      [field]: value,
-    }));
+    if (field === "image") {
+      const file = value as File;
+      setProduct((prevProduct) => ({
+        ...prevProduct,
+        [field]: file,
+      }));
+      // Generate image preview URL
+      setImagePreview(URL.createObjectURL(file));
+    } else {
+      setProduct((prevProduct) => ({
+        ...prevProduct,
+        [field]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const response = await addProduct(product);
-      await Swal.fire({
+      const formData = new FormData();
+      formData.append("name", product.name);
+      formData.append("description", product.description);
+      formData.append("price", product.price);
+      formData.append("quantity", product.quantity);
+      formData.append("category", product.category);
+      formData.append("image", product.image || ""); // Use empty string if image is null
+
+      const response = await fetch(`${BASE_URL}/products/add`, {
+        method: "POST",
+        body: formData,
+        // headers: {
+        //   'Content-Type': 'multipart/form-data' // Do not set Content-Type header for FormData
+        // },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add product");
+      }
+
+      await response.json();
+      Swal.fire({
         icon: "success",
         title: "Product Added!",
         text: "The product has been successfully added.",
@@ -39,11 +80,12 @@ const AddProduct: React.FC<AddProductPopupProps> = ({ onClose }) => {
         name: "",
         description: "",
         price: "",
-        image: null,
+        image: null, // Reset to null
         quantity: "",
-        category: "", // Reset category field after successful submission
+        category: "",
       });
       setError(null);
+      setImagePreview(null); // Reset image preview
       onClose();
     } catch (error: any) {
       console.error("Product add error:", error);
@@ -55,13 +97,14 @@ const AddProduct: React.FC<AddProductPopupProps> = ({ onClose }) => {
       });
     }
   };
+
   return (
-    <div className="flex flex-col items-center justify-center bg-primaryDark rounded-lg shadow-lg p-4 relative w-full max-w-xl"> {/* Increased max width to max-w-xl */}
-    <h2 className="text-xl font-semibold mb-2 text-white">Add Product</h2>
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white p-6 rounded-lg shadow-lg w-full"
-    >
+    <div className="flex flex-col items-center justify-center bg-primaryDark rounded-lg shadow-lg p-4 relative w-full max-w-xl">
+      <h2 className="text-xl font-semibold mb-2 text-white">Add Product</h2>
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded-lg shadow-lg w-full"
+      >
         <div className="mb-6">
           <label
             htmlFor="ProductName"
@@ -79,6 +122,7 @@ const AddProduct: React.FC<AddProductPopupProps> = ({ onClose }) => {
           />
         </div>
 
+        {/* Description input field */}
         <div className="mb-6">
           <label
             htmlFor="ProductDescription"
@@ -86,9 +130,8 @@ const AddProduct: React.FC<AddProductPopupProps> = ({ onClose }) => {
           >
             Product Description
           </label>
-          <input
+          <textarea
             id="description"
-            type="text"
             value={product.description}
             onChange={(e) => handleChange("description", e.target.value)}
             required
@@ -96,6 +139,7 @@ const AddProduct: React.FC<AddProductPopupProps> = ({ onClose }) => {
           />
         </div>
 
+        {/* Price input field */}
         <div className="mb-6">
           <label
             htmlFor="ProductPrice"
@@ -112,12 +156,32 @@ const AddProduct: React.FC<AddProductPopupProps> = ({ onClose }) => {
             className="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
+
+        {/* Quantity input field */}
         <div className="mb-6">
           <label
-            htmlFor="category"
+            htmlFor="ProductQuantity"
             className="block text-gray-700 text-sm font-bold mb-2"
           >
-            Category
+            Product Quantity
+          </label>
+          <input
+            id="quantity"
+            type="number"
+            value={product.quantity}
+            onChange={(e) => handleChange("quantity", e.target.value)}
+            required
+            className="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+
+        {/* Category input field */}
+        <div className="mb-6">
+          <label
+            htmlFor="ProductCategory"
+            className="block text-gray-700 text-sm font-bold mb-2"
+          >
+            Product Category
           </label>
           <input
             id="category"
@@ -128,8 +192,13 @@ const AddProduct: React.FC<AddProductPopupProps> = ({ onClose }) => {
             className="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
+
+        {/* Product Image input field */}
         <div className="mb-6 flex items-center">
-          <label htmlFor="image" className="block text-gray-700 text-sm font-bold mr-2">
+          <label
+            htmlFor="image"
+            className="block text-gray-700 text-sm font-bold mr-2"
+          >
             Product Image
           </label>
           <input
@@ -144,30 +213,15 @@ const AddProduct: React.FC<AddProductPopupProps> = ({ onClose }) => {
             required
             className="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2"
           />
-          {product.image && (
-            <img src={URL.createObjectURL(product.image)} alt="Product" className="w-32 h-auto" />
+          {imagePreview && (
+            <img src={imagePreview} alt="Product" className="w-32 h-auto" />
           )}
         </div>
 
-
-        <div className="mb-6">
-          <label
-            htmlFor="ProductQuantity"
-            className="block text-gray-700 text-sm font-bold mb-2"
-          >
-            Product Quantity
-          </label>
-          <input
-            id="quantity"
-            type="text"
-            value={product.quantity}
-            onChange={(e) => handleChange("quantity", e.target.value)}
-            required
-            className="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-        </div>
-
+        {/* Error message */}
         {error && <div className="text-red-500">{error}</div>}
+
+        {/* Submit button */}
         <button
           type="submit"
           className="bg-secendaryDark hover:bg-secendary text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
@@ -176,6 +230,7 @@ const AddProduct: React.FC<AddProductPopupProps> = ({ onClose }) => {
           Add Product
         </button>
       </form>
+
       <IoClose
         className="absolute top-4 right-4 text-white size-8 cursor-pointer"
         onClick={onClose}

@@ -1,95 +1,43 @@
 const Product = require("../models/productModel");
 const cloudinary = require("../config/cloudinaryConfig");
 const multer = require('multer');
+const fs = require("fs");
 
-// Multer configuration
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Specify the directory to save uploaded files
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname); // Specify filename (you can customize this)
-  }
-});
-
-const upload = multer({ storage: storage });
-// const addProduct = async (req, res) => {
-//   console.log(req.body)
-//   try {
-//     const { name, description, price, quantity, image } = req.body;
-
-//     if (!image) {
-//       return res.status(400).json({ error: "Image file is required" });
-//     }
-
-//     // Upload image to Cloudinary
-//     const uploadedImage = await cloudinary.uploader.upload(image, {
-//       folder: "Music-Ecommerce", // Specify the folder in which to store the image
-//       upload_preset: "Music-Ecommerce", // Specify the upload preset configured in your Cloudinary account
-//     });
-
-//     // Set status based on quantity
-//     const status = quantity > 0 ? "Available" : "Sold Out";
-
-//     // Create new product instance
-//     const product = new Product({
-//       name,
-//       description,
-//       price: parseInt(price),
-//       quantity: parseInt(quantity, 10),
-//       image: uploadedImage,
-//       status,
-//     });
-
-//     // Save product to database
-//     const savedProduct = await product.save();
-
-//     res.status(201).json({ message: "Product added successfully", product: savedProduct });
-//   } catch (error) {
-//     console.error("Error adding product:", error);
-//     res.status(500).json({ message: "Failed to add product" });
-//   }
-// };
 const addProduct = async (req, res) => {
   try {
-    const { name, description, price, quantity, image, category } = req.body;
+    const { name, description, price, quantity, category } = req.body;
+    const imageFile = req.file; // Assuming the image file is sent in the request file object
 
-    if (!image) {
-      return res.status(400).json({ error: "Image file is required" });
+    if (!name || !description || !price || !quantity || !category || !imageFile) {
+      return res.status(400).json({ message: "Missing required parameters" });
     }
 
-    // Convert image to Base64 string
-    const imageData = image.data.toString("base64");
+    // Upload image to Cloudinary and get the image URL
+    const uploadedImage = await cloudinary.uploader.upload(imageFile.path, { folder: 'Ecommerce-Products-Music' });
+    const imageUrl = uploadedImage.secure_url;
 
-    // Upload image to Cloudinary
-    const uploadedImage = await cloudinary.uploader.upload(`data:image/jpeg;base64,${imageData}`, {
-      folder: "Music-Ecommerce",
-      upload_preset: "Music-Ecommerce",
-    });
-
-    // Set status based on quantity
+    // Determine the status based on the quantity
     const status = quantity > 0 ? "Available" : "Sold Out";
 
-    // Create new product instance
-    const product = new Product({
+    const newProduct = new Product({
       name,
       description,
-      price: parseFloat(price),
-      quantity: parseInt(quantity, 10),
-      image: uploadedImage.secure_url,
-      category, // Add category to the product
-      status,
+      price,
+      image: imageUrl, // Use the URL of the uploaded image
+      quantity,
+      category,
+      status // Set the status based on the quantity
     });
 
-    // Save product to database
-    const savedProduct = await product.save();
+    await newProduct.save();
 
-    res.status(201).json({ message: "Product added successfully", product: savedProduct });
+    res.status(201).json({ message: 'Product added successfully' });
   } catch (error) {
-    console.error("Error adding product:", error);
-    res.status(500).json({ message: "Failed to add product" });
+    console.error('Error adding product:', error);
+    res.status(500).json({ message: 'Failed to add product' });
   }
 };
+
 
 const updateProduct = async (req, res) => {
   try {
@@ -159,7 +107,8 @@ const getAllProducts = async (req, res) => {
   }
 };
 
-// Get Product by ID
+
+
 const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
