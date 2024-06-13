@@ -4,17 +4,16 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-// const multer = require('multer');
 const createError = require('http-errors');
-// const axios = require('axios'); 
 const dotenv = require('dotenv');
 const DBConnection = require('./db/DBConnection');
+
 
 // const authMiddleware = require('./middleware/authMiddleware');
 const indexRouter = require('./routes/index');
 const authRouter = require('./routes/user');
 const productRouter = require('./routes/products');
-const productRouter = require('./routes/orders');
+const orderRouter = require('./routes/orderRoutes');
 
 // const protectedRouter = require('./routes/protectedRoutes');
 
@@ -48,7 +47,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/products', productRouter);
-app.use('/orders', productRouter);
+app.use('/orders', orderRouter);
 
 // app.use('/protected', authMiddleware, protectedRouter);
 
