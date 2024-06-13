@@ -39,44 +39,66 @@ const addProduct = async (req, res) => {
 };
 
 
+
+// const updateProduct = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const { name, price, quantity, category } = req.body;
+//     let product = await Product.findById(id);
+
+//     if (!product) {
+//       return res.status(404).json({ message: "Product not found" });
+//     }
+
+//     // Update product fields
+//     if (name) product.name = name;
+//     if (price !== undefined) product.price = parseFloat(price);
+//     if (quantity !== undefined) product.quantity = parseInt(quantity, 10);
+//     if (category) product.category = category;
+
+//     // Determine product status
+//     product.status = product.quantity > 0 ? "Available" : "Sold Out";
+
+//     // Save updated product to database
+//     const updatedProduct = await product.save();
+
+//     // Return success response
+//     res.status(200).json({ message: "Product updated successfully", product: updatedProduct });
+//   } catch (error) {
+//     console.error("Error updating product:", error);
+//     res.status(500).json({ message: "Failed to update product" });
+//   }
+// };
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, price, quantity, image, category } = req.body;
-
-    // Find the product by ID
-    let product = await Product.findOne({ _id: id, isDeleted: false });
+    console.log('Product ID:', id); // Debugging statement
+    const { name, price, quantity, category } = req.body;
+    let product = await Product.findById(id);
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    if (image) {
-      // Upload new image to Cloudinary
-      const uploadedImage = await cloudinary.uploader.upload(image, {
-        folder: "Music-Ecommerce",
-        upload_preset: "Music-Ecommerce",
-      });
-      product.image = uploadedImage.secure_url;
-    }
+    // Update product fields
+    if (name) product.name = name;
+    if (price !== undefined) product.price = parseFloat(price);
+    if (quantity !== undefined) product.quantity = parseInt(quantity, 10);
+    if (category) product.category = category;
 
-    product.name = name || product.name;
-    product.description = description || product.description;
-    product.price = price !== undefined ? parseFloat(price) : product.price;
-    product.quantity = quantity !== undefined ? parseInt(quantity, 10) : product.quantity;
-    product.category = category || product.category; // Update category
+    // Determine product status
     product.status = product.quantity > 0 ? "Available" : "Sold Out";
 
     // Save updated product to database
     const updatedProduct = await product.save();
 
+    // Return success response
     res.status(200).json({ message: "Product updated successfully", product: updatedProduct });
   } catch (error) {
     console.error("Error updating product:", error);
     res.status(500).json({ message: "Failed to update product" });
   }
 };
-
 
 // Soft Delete Product
 const deleteProduct = async (req, res) => {
