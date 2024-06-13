@@ -14,6 +14,8 @@ const DBConnection = require('./db/DBConnection');
 const indexRouter = require('./routes/index');
 const authRouter = require('./routes/user');
 const productRouter = require('./routes/products');
+const productRouter = require('./routes/orders');
+
 // const protectedRouter = require('./routes/protectedRoutes');
 
 const app = express();
@@ -46,6 +48,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/products', productRouter);
+app.use('/orders', productRouter);
+
 // app.use('/protected', authMiddleware, protectedRouter);
 
 // Catch 404 and forward to error handler

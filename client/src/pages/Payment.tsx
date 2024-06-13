@@ -182,14 +182,34 @@ const PaymentPage: React.FC = () => {
 
   const handlePayment = async (token: Token) => {
     try {
-      // Simulate successful payment (replace with actual payment processing logic)
+      const response = await fetch('http://localhost:4000/orders/placeOrder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formDataState.name,
+          address: formDataState.address,
+          contactNumber: formDataState.contactNumber,
+          cartItems: cartItems.map(item => ({
+            _id: item._id,
+            quantity: item.quantity,
+          })),
+          totalAmount: calculateTotalPrice(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to place order');
+      }
+
+      const responseData = await response.json();
       await Swal.fire({
         icon: 'success',
         title: 'Payment Successful!',
-        text: 'Your payment has been processed successfully.',
+        text: `Your payment has been processed successfully. Order ID: ${responseData.orderId}`,
       });
 
-      // Navigate to success page or any other logic after payment success
       navigate('/payment-success');
     } catch (error) {
       console.error('Error processing payment:', error);
