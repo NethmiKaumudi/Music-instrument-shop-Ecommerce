@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+// import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import LoginImage from "../assests/img/Login Image.png";
 import { loginUser } from "../api/authApi"; // Import authentication functions
-import { jwtDecode } from "jwt-decode";
+import { useState } from "react";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -21,7 +21,6 @@ const Login: React.FC = () => {
 
       // Decode the token to extract role information
       const role: string = userData.role; // Access the role from the response
-console.log(role);
 
       // Display success message
       await Swal.fire({
@@ -30,23 +29,23 @@ console.log(role);
         text: "You have successfully logged in.",
       });
 
-      console.log(role);
-
       if (location.pathname === "/cart") {
-        // If user logged in during checkout, navigate to payment page
-        navigate("/payment");
+        // If user logged in during checkout, navigate to payment page with data
+        const { formData, cart } = location.state as { formData: any; cart: any[] };
+        navigate("/payment", { state: { formData, cart } });
       } else if (role === "customer") {
         // If user is a customer, navigate to product list page
         navigate("/product-list");
       } else if (role === "admin") {
-        // If user is an owner, navigate to product add form with sidebar
-        navigate("/admin", { replace: true });
+        // If user is an admin, navigate to admin dashboard or product add form
+        navigate("/admin"); // Update this based on your actual admin route
       } else {
         // Default redirect, can be modified based on requirements
-        navigate("/product-list");
+        navigate("/"); // Redirect to home or login page
       }
     } catch (error) {
-      setError("Login failed. Please check your credentials.");
+      // Handle login errors
+      setError("Invalid username or password. Please try again."); // Example error handling
       console.error("Login error:", error);
     }
   };

@@ -1,19 +1,17 @@
 import React from "react";
 import HomeImage from "../../../assests/img/Home image.png";
 import PrimaryButton from "../../Shared/PrimaryButton";
-import { Navigate, useNavigate } from "react-router-dom"; // Update import statement
+import { Link, Navigate, useNavigate } from "react-router-dom"; // Update import statement
 
 const Home = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
-  const navigateToProductList = () => {
-    navigate("/product-list");
-    
-  };
+ 
 
   return (
     <>
-      <div className="relative z-[-1] bg-secendary">
+
+    <div className="relative  bg-secendary">
         <div className="container py-16 sm:py-[48px]">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 place-items-center min-h-[600px]">
             {/* text section */}
@@ -29,7 +27,9 @@ const Home = () => {
                 top choice for musical instruments.
               </p>
               <div className="pl-1">
-                <PrimaryButton onClick={navigateToProductList} />
+              {/* Add Shopnow button */}
+              <PrimaryButton >Shop Now</PrimaryButton>
+{/* <Link to={"/product-list"}>Shop Now</Link> */}
               </div>
             </div>
             {/* button section */}

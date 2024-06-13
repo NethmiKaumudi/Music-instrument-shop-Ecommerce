@@ -23,7 +23,7 @@ const Navbar: React.FC = () => {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="shadow-md w-full fixed top-0 left-0">
+    <div className="shadow-md w-full fixed top-0 left-0 z-10">
       <div className="md:flex items-center justify-between bg-white py-0.5 md:px-10 px-7">
       <Link to="/" className="text-2xl text-secendaryDark mr-4 pt-2 cursor-pointer flex items-center font-inter">
         <img
