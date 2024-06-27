@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom'; // Import useLocation from react-router-dom
+import { Link, useLocation, useNavigate } from 'react-router-dom'; // Import useLocation from react-router-dom
 import Swal from 'sweetalert2';
 import logo from '../assests/img/nk music logo.png'; // Adjusted import path for logo
 import { IonIcon } from '@ionic/react';
 import { trash } from 'ionicons/icons';
 import StripeCheckout, { Token } from 'react-stripe-checkout';
+import { IoLogOutOutline } from 'react-icons/io5';
 
 interface CartItem {
   _id: string;
@@ -17,6 +18,8 @@ interface CartItem {
 
 const PaymentPage: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+
   const { formData, cart }: { formData: any; cart: CartItem[] } = location.state || { formData: null, cart: [] };
 
   const [cartItems] = useState<CartItem[]>(cart);
@@ -25,13 +28,22 @@ const PaymentPage: React.FC = () => {
     address: formData?.address || '',
     contactNumber: formData?.contactNumber || '',
   });
-
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // Remove token from localStorage
+    navigate("/login"); // Navigate to login page
+  };
   const handlePayment = async (token: Token) => {
+    const authToken = localStorage.getItem('token'); // Get the token from localStorage
+
     try {
       const response = await fetch('http://localhost:4000/orders/placeOrder', {
-        method: 'POST',
+        // method: 'POST',
+        // headers: {
+        //   'Content-Type': 'application/json',
+        // },
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`, // Include the token in the headers
         },
         body: JSON.stringify({
           name: formDataState.name,
@@ -76,7 +88,7 @@ const PaymentPage: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Navbar */}
-      <nav className="nav-bar flex items-center justify-between bg-secondaryDark text-white py-2 px-6">
+      <nav className="nav-bar flex items-center justify-between bg-secendaryDark text-white py-2 px-6">
         <Link to="/" className="text-2xl font-inter flex items-center">
           <img
             alt="logo"
@@ -86,6 +98,12 @@ const PaymentPage: React.FC = () => {
           />
           NKBEATS
         </Link>
+        <button
+        className="flex items-center bg-secendary hover:bg-primary text-white font-bold py-2 px-4 rounded"
+        onClick={handleLogout} // Call handleLogout when the button is clicked
+      >
+        <IoLogOutOutline className="mr-2" style={{ borderRadius: '50%' }} /> Log Out
+      </button>
       </nav>
 
       {/* Main content */}

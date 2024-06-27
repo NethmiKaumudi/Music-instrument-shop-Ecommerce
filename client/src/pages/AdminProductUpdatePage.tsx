@@ -25,11 +25,42 @@ const AdminProductUpdateForm: React.FC<{
     setUpdatedProduct({ ...updatedProduct, [field]: value });
   };
 
+  // const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   try {
+  //     // Send updated product data to backend for update
+  //     await axios.put(`http://localhost:4000/products/${product._id}`, {
+  //       name: updatedProduct.name,
+  //       price: updatedProduct.price,
+  //       quantity: updatedProduct.quantity,
+  //       category: updatedProduct.category,
+  //     });
+  //     // Handle success
+  //     Swal.fire({
+  //       icon: "success",
+  //       title: "Product Updated!",
+  //       showConfirmButton: false,
+  //       timer: 1500, // Close SweetAlert after 1.5 seconds
+  //     });
+  //     onProductUpdate(); // Trigger product list update
+  //     onClose(); // Close the form after successful update
+  //   } catch (error) {
+  //     setError("Error updating product. Please try again."); // Handle error appropriately
+  //   }
+  // };
+  const token = localStorage.getItem('token');
+  const axiosInstance = axios.create({
+    baseURL: 'http://localhost:4000',
+    headers: {
+      Authorization: `Bearer ${token}`, // Include token in the Authorization header
+      'Content-Type': 'application/json',
+    },
+  });
+  
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      // Send updated product data to backend for update
-      await axios.put(`http://localhost:4000/products/${product._id}`, {
+      await axiosInstance.put(`/products/${product._id}`, {
         name: updatedProduct.name,
         price: updatedProduct.price,
         quantity: updatedProduct.quantity,
@@ -37,17 +68,18 @@ const AdminProductUpdateForm: React.FC<{
       });
       // Handle success
       Swal.fire({
-        icon: "success",
-        title: "Product Updated!",
+        icon: 'success',
+        title: 'Product Updated!',
         showConfirmButton: false,
-        timer: 1500, // Close SweetAlert after 1.5 seconds
+        timer: 1500,
       });
-      onProductUpdate(); // Trigger product list update
-      onClose(); // Close the form after successful update
+      onProductUpdate();
+      onClose();
     } catch (error) {
-      setError("Error updating product. Please try again."); // Handle error appropriately
+      setError('Error updating product. Please try again.');
     }
   };
+  
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">

@@ -3,6 +3,7 @@ import Swal from "sweetalert2";
 import { IoClose } from "react-icons/io5";
 
 const BASE_URL = "http://localhost:4000"; // Replace this with your backend URL
+const token = localStorage.getItem('token');
 
 interface Product {
   name: string;
@@ -15,9 +16,9 @@ interface Product {
 
 interface AddProductPopupProps {
   onClose: () => void;
-}
+  onAdd:()=> void;}
 
-const AddProduct: React.FC<AddProductPopupProps> = ({ onClose }) => {
+const AddProduct: React.FC<AddProductPopupProps> = ({ onClose ,onAdd}) => {
   const [product, setProduct] = useState<Product>({
     name: "",
     description: "",
@@ -47,6 +48,57 @@ const AddProduct: React.FC<AddProductPopupProps> = ({ onClose }) => {
     }
   };
 
+  // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  //   event.preventDefault();
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("name", product.name);
+  //     formData.append("description", product.description);
+  //     formData.append("price", product.price);
+  //     formData.append("quantity", product.quantity);
+  //     formData.append("category", product.category);
+  //     formData.append("image", product.image || ""); // Use empty string if image is null
+
+  //     const response = await fetch(`${BASE_URL}/products/add`, {
+  //       method: "POST",
+  //       body: formData,
+  //       // headers: {
+  //       //   'Content-Type': 'multipart/form-data' // Do not set Content-Type header for FormData
+  //       // },
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error("Failed to add product");
+  //     }
+
+  //     await response.json();
+  //     Swal.fire({
+  //       icon: "success",
+  //       title: "Product Added!",
+  //       text: "The product has been successfully added.",
+  //     });
+  //     setProduct({
+  //       name: "",
+  //       description: "",
+  //       price: "",
+  //       image: null, // Reset to null
+  //       quantity: "",
+  //       category: "",
+  //     });
+  //     setError(null);
+  //     setImagePreview(null); // Reset image preview
+  //     onAdd();
+  //     onClose();
+  //   } catch (error: any) {
+  //     console.error("Product add error:", error);
+  //     setError("Failed to add product. Please try again.");
+  //     await Swal.fire({
+  //       icon: "error",
+  //       title: "Product Addition Failed!",
+  //       text: "Failed to add product. Please try again.",
+  //     });
+  //   }
+  // };
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
@@ -56,20 +108,20 @@ const AddProduct: React.FC<AddProductPopupProps> = ({ onClose }) => {
       formData.append("price", product.price);
       formData.append("quantity", product.quantity);
       formData.append("category", product.category);
-      formData.append("image", product.image || ""); // Use empty string if image is null
-
+      formData.append("image", product.image || "");
+  
       const response = await fetch(`${BASE_URL}/products/add`, {
         method: "POST",
         body: formData,
-        // headers: {
-        //   'Content-Type': 'multipart/form-data' // Do not set Content-Type header for FormData
-        // },
+        headers: {
+          Authorization: `Bearer ${token}`, // Include token in the Authorization header
+        },
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to add product");
       }
-
+  
       await response.json();
       Swal.fire({
         icon: "success",
@@ -80,12 +132,13 @@ const AddProduct: React.FC<AddProductPopupProps> = ({ onClose }) => {
         name: "",
         description: "",
         price: "",
-        image: null, // Reset to null
+        image: null,
         quantity: "",
         category: "",
       });
       setError(null);
-      setImagePreview(null); // Reset image preview
+      setImagePreview(null);
+      onAdd();
       onClose();
     } catch (error: any) {
       console.error("Product add error:", error);
@@ -97,6 +150,7 @@ const AddProduct: React.FC<AddProductPopupProps> = ({ onClose }) => {
       });
     }
   };
+  
 
   return (
     <div className="flex flex-col items-center justify-center bg-primaryDark rounded-lg shadow-lg p-4 relative w-full max-w-xl">

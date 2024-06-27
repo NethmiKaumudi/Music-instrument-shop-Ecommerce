@@ -7,11 +7,15 @@ import logo from "../../assests/img/nk music logo.png";
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
 
+  // const handleLogout = () => {
+  //   // logoutUser();
+  //   navigate("/login");
+  // };
   const handleLogout = () => {
-    // logoutUser();
+    // Remove token from localStorage
+    localStorage.removeItem('token');
     navigate("/login");
   };
-
 
   return (
     <nav className="bg-primaryDark p-4 flex justify-between items-center">
