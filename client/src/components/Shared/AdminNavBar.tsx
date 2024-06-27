@@ -1,20 +1,31 @@
+
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { IoLogOutOutline } from "react-icons/io5";
-// import { logoutUser } from "../../api/authApi";
 import logo from "../../assests/img/nk music logo.png";
 
-const Navbar: React.FC = () => {
-  const navigate = useNavigate();
+interface NavbarProps {
+  onSwitchToProducts?: () => void;
+  onSwitchToOrders?: () => void;
+}
 
-  // const handleLogout = () => {
-  //   // logoutUser();
-  //   navigate("/login");
-  // };
+const Navbar: React.FC<NavbarProps> = ({ onSwitchToProducts, onSwitchToOrders }) => {
+  const handleProductsClick = () => {
+    if (onSwitchToProducts) {
+      onSwitchToProducts();
+    }
+  };
+
+  const handleOrdersClick = () => {
+    if (onSwitchToOrders) {
+      onSwitchToOrders();
+    }
+  };
+
   const handleLogout = () => {
-    // Remove token from localStorage
     localStorage.removeItem('token');
-    navigate("/login");
+    // Assuming /login is the route for logging in
+    window.location.href = "/login"; // Use window.location.href for full page reload
   };
 
   return (
@@ -28,12 +39,26 @@ const Navbar: React.FC = () => {
         />
         NKBEATS
       </Link>
-      <button
-        className="flex items-center bg-secendary hover:bg-primary text-white font-bold py-2 px-4 rounded"
-        onClick={handleLogout} // Call handleLogout when the button is clicked
-      >
-        <IoLogOutOutline className="mr-2" style={{ borderRadius: '50%' }} /> Log Out
-      </button>
+      <div className="flex items-center space-x-4">
+        <button
+          className="bg-secendary hover:bg-primary text-white font-bold py-2 px-4 rounded"
+          onClick={handleProductsClick}
+        >
+          Products
+        </button>
+        <button
+          className="bg-secendary hover:bg-primary text-white font-bold py-2 px-4 rounded"
+          onClick={handleOrdersClick}
+        >
+          Orders
+        </button>
+        <button
+          className="flex items-center bg-secendary hover:bg-primary text-white font-bold py-2 px-4 rounded ml-auto"
+          onClick={handleLogout}
+        >
+          <IoLogOutOutline className="mr-2" style={{ borderRadius: '50%' }} /> Log Out
+        </button>
+      </div>
     </nav>
   );
 };
