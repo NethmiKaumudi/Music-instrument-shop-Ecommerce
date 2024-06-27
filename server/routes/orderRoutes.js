@@ -11,6 +11,6 @@ const router = express.Router();
 const orderController = require('../controllers/orderController');
 const authMiddleware = require('../middleware/authMiddleware');
 
-router.post('/placeOrder', authMiddleware('user', 'admin'), orderController.placeOrder);
+router.post('/placeOrder', authMiddleware('customer', 'admin'), orderController.placeOrder);
 
 module.exports = router;

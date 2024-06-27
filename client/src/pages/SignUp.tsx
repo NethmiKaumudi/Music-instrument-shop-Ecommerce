@@ -2,129 +2,65 @@ import React, { useState } from "react";
 import SignUpImage from "../assests/img/SignUp Image.png";
 import { signupUser } from "../api/authApi.js";
 import Swal from "sweetalert2";
+import { useLocation, useNavigate } from "react-router-dom";
 
-interface FormState {
-  name: string;
-  username: string;
-  email: string;
-  password: string;
-  role: string;
-}
 
-const initialFormState: FormState = {
-  name: "",
-  username: "",
-  email: "",
-  password: "",
-  role: "customer",
-};
+interface SignUpProps {}
 
-const SignUp: React.FC = () => {
-  const [formState, setFormState] = useState<FormState>(initialFormState);
+const SignUp: React.FC<SignUpProps> = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Retrieve cart and formData from location state
+  const { formData: cartPageFormData, cart: cartItems = [] } =
+    location.state || { formData: {}, cart: [] };
+  const [formState, setFormState] = useState({
+    name: '',
+    username: '',
+    email: '',
+    password: '',
+    role: 'customer', // Default role
+  });
+
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [error, setError] = useState<string | null>(null);
 
-  const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({
-    name: false,
-    username: false,
-    email: false,
-    password: false,
-    role: false,
-  });
-  
-  const handleChange = (field: keyof FormState, value: string) => {
+  const handleChange = (field: string, value: string) => {
     setFormState((prevState) => ({
       ...prevState,
       [field]: value,
     }));
-    
-    // Mark the field as touched
-    setTouchedFields((prevState) => ({
-      ...prevState,
-      [field]: true,
-    }));
   };
-  
-  const validateForm = () => {
-    const { name, username, email, password } = formState;
-    const errors: { [key: string]: string } = {};
-  
-    // Check if the current field is touched before validating
-    if (touchedFields.name) {
-      if (!name.trim()) {
-        errors.name = "Name is required";
-      } else if (name.trim().split(" ").length < 2) {
-        errors.name = "Name must contain at least two parts separated by a space";
-      } else if (name.trim().length < 5) {
-        errors.name = "Name must be at least 5 characters long";
-      }
-    }
-  
-    if (touchedFields.username) {
-      if (!username.trim()) {
-        errors.username = "Username is required";
-      } else if (username.trim().length < 5) {
-        errors.username = "Username must be at least 5 characters long";
-      }
-    }
-  
-    if (touchedFields.email) {
-      if (!email.trim()) {
-        errors.email = "Email is required";
-      } else {
-        const emailRegex = /\S+@\S+\.\S+/;
-        if (!emailRegex.test(email)) {
-          errors.email = "Invalid email address";
-        }
-      }
-    }
-  
-    if (touchedFields.password) {
-      if (!password.trim()) {
-        errors.password = "Password is required";
-      } else {
-        const passwordRegex =
-          /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{6,}$/;
-        if (!passwordRegex.test(password)) {
-          errors.password =
-            "Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, and one number";
-        }
-      }
-    }
-  
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-  
-  
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const isFormValid = validateForm();
-
-    if (!isFormValid) {
-      setError("Please fill in all fields correctly.");
-      return;
-    }
-
     try {
-      const response = await signupUser(formState);
+      // Merge cartPageFormData with current formState
+      const mergedFormData = {
+        ...formState,
+        ...cartPageFormData,
+      };
+
+      // Call signup API
+      const response = await signupUser(mergedFormData);
+            // const response = await signupUser(formState);
+
 
       await Swal.fire({
-        icon: "success",
-        title: "Signup Successful!",
-        text: "You have successfully signed up.",
+        icon: 'success',
+        title: 'Signup Successful!',
+        text: 'You have successfully signed up.',
       });
+      console.log({ state: { formData: cartPageFormData, cart: cartItems } })
+      console.log('/login',{ state: { formData: cartPageFormData, cart: cartItems } })
 
-      console.log("Signup successful:", response);
-      // Reset form and errors after successful submission
-      setFormState(initialFormState);
-      setFormErrors({});
-      setError(null);
-      window.location.href = "/login"; // Redirect to Login page
+
+      navigate('/login', { state: { formData: cartPageFormData, cart: cartItems } });
+
     } catch (error: any) {
-      console.error("Signup error:", error);
-      let errorMessage = "Signup failed. Please try again.";
+      console.error('Signup error:', error);
+      let errorMessage = 'Signup failed. Please try again.';
 
       if (error.response && error.response.data) {
         errorMessage = error.response.data.message || errorMessage;
@@ -133,13 +69,12 @@ const SignUp: React.FC = () => {
       setError(errorMessage);
 
       await Swal.fire({
-        icon: "error",
-        title: "Signup Failed!",
+        icon: 'error',
+        title: 'Signup Failed!',
         text: errorMessage,
       });
     }
   };
-
   return (
     <div className="flex h-screen w-screen justify-center items-center bg-gray-100">
       <div className="max-w-6xl w-full p-2 bg-white rounded-lg shadow-md grid grid-cols-1 md:grid-cols-2 gap-8">

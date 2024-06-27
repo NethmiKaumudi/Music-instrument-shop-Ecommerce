@@ -75,5 +75,23 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { signup, login };
+// module.exports = { signup, login };
+const searchUserByEmail = async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    const user = await User.findOne({ email }); // Search for user by email
+
+    if (user) {
+      res.status(200).json({ exists: true, user });
+    } else {
+      res.status(404).json({ exists: false });
+    }
+  } catch (error) {
+    console.error('Error searching user by email:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+module.exports = { signup, login, searchUserByEmail };
 

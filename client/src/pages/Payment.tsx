@@ -32,18 +32,18 @@ const PaymentPage: React.FC = () => {
     localStorage.removeItem("token"); // Remove token from localStorage
     navigate("/login"); // Navigate to login page
   };
-  const handlePayment = async (token: Token) => {
-    const authToken = localStorage.getItem('token'); // Get the token from localStorage
+  const handlePayment = async () => {
+    const token = localStorage.getItem('token'); // Get the token from localStorage
 
     try {
       const response = await fetch('http://localhost:4000/orders/placeOrder', {
-        // method: 'POST',
+        method: 'POST',
         // headers: {
         //   'Content-Type': 'application/json',
         // },
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`, // Include the token in the headers
+          "Content-Type": 'application/json',
+          "Authorization": `Bearer ${token}`, // Include the token in the headers
         },
         body: JSON.stringify({
           name: formDataState.name,
