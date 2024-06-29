@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom'; // Import useLocation from react-router-dom
+import { Link, useLocation, useNavigate } from 'react-router-dom'; 
 import Swal from 'sweetalert2';
-import logo from '../assests/img/nk music logo.png'; // Adjusted import path for logo
+import logo from '../assests/img/nk music logo.png'; 
 import { IonIcon } from '@ionic/react';
 import { trash } from 'ionicons/icons';
 import StripeCheckout, { Token } from 'react-stripe-checkout';

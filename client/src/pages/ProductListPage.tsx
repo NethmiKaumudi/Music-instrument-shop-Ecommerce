@@ -647,7 +647,7 @@ const ProductListingPage: React.FC = () => {
       icon: "success",
       title: "Added to Cart",
       text: `${product.name} has been added to your cart.`,
-      timer: 1500,
+      timer: 200,
       showConfirmButton: true,
       confirmButtonColor: "#3b82f6",
       confirmButtonText: "OK",
@@ -678,7 +678,7 @@ const ProductListingPage: React.FC = () => {
     } else if (selectedSortCriteria === "price") {
       setProducts([...products].sort((a, b) => a.price - b.price));
     } else {
-      fetchProducts(); // Fetch products in default order or handle 'all' case
+      fetchProducts(); 
     }
   };
 

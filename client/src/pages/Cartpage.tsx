@@ -25,7 +25,7 @@ const CartPage: React.FC = () => {
     name: "",
     address: "",
     contactNumber: "",
-    email: "", // Add email field to formData
+    email: "", 
   });
 
   const handleQuantityChange = (index: number, increment: boolean) => {
@@ -50,16 +50,15 @@ const CartPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Check if the user is logged in (you can modify this based on your authentication state)
-    const isLoggedIn = localStorage.getItem("userData"); // Example: Check if user data exists in localStorage
+    
+    const token = localStorage.getItem("token"); // Check if token exists in localStorage
 
-    if (isLoggedIn) {
+    if (token) {
       // Directly navigate to PaymentPage
       navigate("/payment", { state: { formData, cart } });
       return;
     }
-
-    // Proceed with email check logic if user is not logged in
+    
     const { email } = formData;
     console.log(formData, cart);
 
@@ -88,28 +87,7 @@ const CartPage: React.FC = () => {
     }
   };
 
-  // const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   const { email } = formData;
-
-  //   try {
-  //     const response = await axios.get(`http://localhost:4000/auth/search/${email}`);
-  //     const { exists } = response.data;
-
-  //     if (exists) {
-  //       navigate('/login', { state: { formData,cart } });
-  //     } else {
-  //       navigate('/signup', { state: { formData ,cart} });
-  //     }
-  //   } catch (error:any) {
-  //     console.error('Error checking email:', error);
-  //     if (error.response && error.response.status === 404) {
-  //       navigate('/signup', { state: { formData } });
-  //     } else {
-  //       alert('Something went wrong!');
-  //     }
-  //   }
-  // };
+  
   return (
     <div className="flex flex-col min-h-screen">
       <nav className="nav-bar flex items-center justify-between bg-secondaryDark text-white py-2 px-6">
