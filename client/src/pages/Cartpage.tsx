@@ -54,7 +54,6 @@ const CartPage: React.FC = () => {
     const token = localStorage.getItem("token"); // Check if token exists in localStorage
 
     if (token) {
-      // Directly navigate to PaymentPage
       navigate("/payment", { state: { formData, cart } });
       return;
     }

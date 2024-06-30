@@ -19,7 +19,7 @@ const SignUp: React.FC<SignUpProps> = () => {
     username: '',
     email: '',
     password: '',
-    role: 'customer', // Default role
+    role: 'customer',
   });
 
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
@@ -42,9 +42,7 @@ const SignUp: React.FC<SignUpProps> = () => {
         ...cartPageFormData,
       };
 
-      // Call signup API
       const response = await signupUser(mergedFormData);
-            // const response = await signupUser(formState);
 
 
       await Swal.fire({

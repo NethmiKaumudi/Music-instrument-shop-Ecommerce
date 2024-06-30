@@ -57,7 +57,7 @@ const Navbar: React.FC = () => {
               </a>
             </li>
           ))}
-          <Button>Login</Button> {/* Use the Button component */}
+          <Button>Login</Button> 
         </ul>
       </div>
     </div>

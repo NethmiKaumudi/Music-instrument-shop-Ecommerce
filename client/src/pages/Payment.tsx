@@ -68,9 +68,7 @@ const PaymentPage: React.FC = () => {
         text: `Your payment has been processed successfully. Order ID: ${responseData.orderId}`,
       });
 
-      // Handle navigation after successful payment
-      // Replace '/payment-success' with your actual success page path
-      // navigate('/payment-success');
+      
     } catch (error) {
       console.error('Error processing payment:', error);
       await Swal.fire({
@@ -100,7 +98,7 @@ const PaymentPage: React.FC = () => {
         </Link>
         <button
         className="flex items-center bg-secendary hover:bg-primary text-white font-bold py-2 px-4 rounded"
-        onClick={handleLogout} // Call handleLogout when the button is clicked
+        onClick={handleLogout} 
       >
         <IoLogOutOutline className="mr-2" style={{ borderRadius: '50%' }} /> Log Out
       </button>
@@ -179,7 +177,7 @@ const PaymentPage: React.FC = () => {
                 stripeKey="pk_test_51Oqpc6DDs5wFiqTUqxEnnoVTjDMMCjMgbCnSwxKmVcHMCT8rLXO4wL7nTptnarrKOUMw4XRe1RNmvTBfWgC3t3mp00rTvqUUAW" // Replace with your Stripe publishable key
                 token={handlePayment}
                 name="NKBEATS"
-                amount={calculateTotalPrice() * 100} // Amount in cents
+                amount={calculateTotalPrice() * 100}
               />
             </form>
           </div>

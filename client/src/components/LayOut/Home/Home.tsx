@@ -1,8 +1,7 @@
 import React from "react";
 import HomeImage from "../../../assests/img/Home image.png";
 import PrimaryButton from "../../Shared/PrimaryButton";
-import { Link, Navigate, useNavigate } from "react-router-dom"; // Update import statement
-
+import { Link, Navigate, useNavigate } from "react-router-dom";
 const Home = () => {
   // const navigate = useNavigate();
 

@@ -4,8 +4,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 interface PrimaryButtonProps {
-  // to: string; // Define the route to navigate to
-  children: React.ReactNode; // Define children as React.ReactNode
+  children: React.ReactNode; 
 }
 
 const PrimaryButton: React.FC<PrimaryButtonProps> = ({  children }:PrimaryButtonProps) => {

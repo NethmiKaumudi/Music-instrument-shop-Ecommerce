@@ -9,7 +9,8 @@ import CartPage from "./pages/Cartpage";
 import Payment from "./pages/Payment";
 import NotFound from "./pages/NotFound";
 import AdminDashBoard from "./pages/AdminDashBoard";
-import StripeProvider from "./api/stripePovider"; // Import the StripeProvider component
+// Import the StripeProvider component
+import StripeProvider from "./api/stripePovider"; 
 
 const App: React.FC = () => {
   return (

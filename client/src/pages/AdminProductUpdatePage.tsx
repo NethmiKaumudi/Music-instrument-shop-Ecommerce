@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { IoClose } from "react-icons/io5"; // Import the close icon from Ionicons
+import { IoClose } from "react-icons/io5"; 
 import axios from "axios";
-import Swal from "sweetalert2"; // Import SweetAlert
+import Swal from "sweetalert2";
 
 interface Product {
   _id: string;
@@ -12,12 +12,12 @@ interface Product {
 }
 
 const AdminProductUpdateForm: React.FC<{
-  product: Product; // Correctly typed Product interface
+  product: Product; 
   onClose: () => void;
-  onProductUpdate: () => void; // Function to trigger product list update
+  onProductUpdate: () => void; 
 }> = ({ product, onClose, onProductUpdate }) => {
   const [updatedProduct, setUpdatedProduct] = useState<Product>({
-    ...product, // Initialize with the product data passed from AdminProductLoadPage
+    ...product, 
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -25,34 +25,12 @@ const AdminProductUpdateForm: React.FC<{
     setUpdatedProduct({ ...updatedProduct, [field]: value });
   };
 
-  // const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   try {
-  //     // Send updated product data to backend for update
-  //     await axios.put(`http://localhost:4000/products/${product._id}`, {
-  //       name: updatedProduct.name,
-  //       price: updatedProduct.price,
-  //       quantity: updatedProduct.quantity,
-  //       category: updatedProduct.category,
-  //     });
-  //     // Handle success
-  //     Swal.fire({
-  //       icon: "success",
-  //       title: "Product Updated!",
-  //       showConfirmButton: false,
-  //       timer: 1500, // Close SweetAlert after 1.5 seconds
-  //     });
-  //     onProductUpdate(); // Trigger product list update
-  //     onClose(); // Close the form after successful update
-  //   } catch (error) {
-  //     setError("Error updating product. Please try again."); // Handle error appropriately
-  //   }
-  // };
+  
   const token = localStorage.getItem('token');
   const axiosInstance = axios.create({
     baseURL: 'http://localhost:4000',
     headers: {
-      Authorization: `Bearer ${token}`, // Include token in the Authorization header
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
   });
@@ -66,7 +44,6 @@ const AdminProductUpdateForm: React.FC<{
         quantity: updatedProduct.quantity,
         category: updatedProduct.category,
       });
-      // Handle success
       Swal.fire({
         icon: 'success',
         title: 'Product Updated!',
@@ -88,7 +65,7 @@ const AdminProductUpdateForm: React.FC<{
         <form
           onSubmit={handleSubmit}
           className="bg-white p-4 rounded-lg shadow-lg w-full max-h-96 overflow-y-auto"
-          style={{ maxHeight: "600px" }} // Set maximum height for the form
+          style={{ maxHeight: "600px" }} 
         >
           {/* Product Name input field */}
           <div className="mb-5">

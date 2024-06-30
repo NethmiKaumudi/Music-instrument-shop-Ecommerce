@@ -1,6 +1,5 @@
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
-// const {aws4} = require("mongodb/src/deps");
 
 dotenv.config();
 const MONGODB_URL = process.env.MONGODB_URL;
