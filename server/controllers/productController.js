@@ -23,10 +23,10 @@ const addProduct = async (req, res) => {
       name,
       description,
       price,
-      image: imageUrl, // Use the URL of the uploaded image
+      image: imageUrl, 
       quantity,
       category,
-      status // Set the status based on the quantity
+      status 
     });
 
     await newProduct.save();
@@ -39,40 +39,10 @@ const addProduct = async (req, res) => {
 };
 
 
-
-// const updateProduct = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const { name, price, quantity, category } = req.body;
-//     let product = await Product.findById(id);
-
-//     if (!product) {
-//       return res.status(404).json({ message: "Product not found" });
-//     }
-
-//     // Update product fields
-//     if (name) product.name = name;
-//     if (price !== undefined) product.price = parseFloat(price);
-//     if (quantity !== undefined) product.quantity = parseInt(quantity, 10);
-//     if (category) product.category = category;
-
-//     // Determine product status
-//     product.status = product.quantity > 0 ? "Available" : "Sold Out";
-
-//     // Save updated product to database
-//     const updatedProduct = await product.save();
-
-//     // Return success response
-//     res.status(200).json({ message: "Product updated successfully", product: updatedProduct });
-//   } catch (error) {
-//     console.error("Error updating product:", error);
-//     res.status(500).json({ message: "Failed to update product" });
-//   }
-// };
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log('Product ID:', id); // Debugging statement
+    console.log('Product ID:', id); 
     const { name, price, quantity, category } = req.body;
     let product = await Product.findById(id);
 
@@ -86,13 +56,10 @@ const updateProduct = async (req, res) => {
     if (quantity !== undefined) product.quantity = parseInt(quantity, 10);
     if (category) product.category = category;
 
-    // Determine product status
     product.status = product.quantity > 0 ? "Available" : "Sold Out";
 
-    // Save updated product to database
     const updatedProduct = await product.save();
 
-    // Return success response
     res.status(200).json({ message: "Product updated successfully", product: updatedProduct });
   } catch (error) {
     console.error("Error updating product:", error);
@@ -100,7 +67,6 @@ const updateProduct = async (req, res) => {
   }
 };
 
-// Soft Delete Product
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -118,7 +84,6 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-// Get All Products
 const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find({ isDeleted: false });

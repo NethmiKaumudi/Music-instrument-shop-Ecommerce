@@ -23,7 +23,7 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    category: { // Add the category field
+    category: { 
       type: String,
       required: true,
     },

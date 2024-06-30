@@ -2,14 +2,14 @@ const passport = require('passport');
 const passportJWT = require('passport-jwt');
 const JWT = require('jwt-simple');
 const bcrypt = require('bcryptjs');
-const User = require('./models/userModel'); // Ensure your user model is imported correctly
+const User = require('./models/userModel'); 
 
 const ExtractJwt = passportJWT.ExtractJwt;
 const JwtStrategy = passportJWT.Strategy;
 
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET, // Ensure you have a JWT secret in your .env file
+  secretOrKey: process.env.JWT_SECRET, 
 };
 
 const strategy = new JwtStrategy(jwtOptions, async (jwt_payload, next) => {
